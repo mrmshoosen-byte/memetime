@@ -63,9 +63,9 @@ export default function InteractiveClock({ onDateChange }) {
   const minutes = selectedDate.getMinutes();
   const seconds = selectedDate.getSeconds();
 
-  const secondAngle = (seconds * 6); // 360 / 60
-  const minuteAngle = (minutes * 6) + (seconds * 0.1); // 360 / 60
-  const hourAngle = (hours * 30) + (minutes * 0.5); // 360 / 12
+  const secondAngle = seconds * 6;
+  const minuteAngle = minutes * 6 + seconds * 0.1;
+  const hourAngle = hours * 30 + minutes * 0.5;
 
   const dateInputValue = selectedDate.toISOString().split('T')[0];
   const timeInputValue = selectedDate.toTimeString().slice(0, 5);
@@ -88,93 +88,119 @@ export default function InteractiveClock({ onDateChange }) {
 
         {/* Analog Clock Display */}
         <div className="flex flex-col items-center gap-6 mb-6">
-          {/* Clock Face */}
-          <div className="relative w-64 h-64 rounded-full bg-gradient-to-b from-dark-card to-dark-bg border-4 border-neon-blue shadow-2xl" style={{boxShadow: '0 0 30px rgba(0, 240, 255, 0.5)'}}>
-            {/* Center Dot */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-neon-blue rounded-full z-10" style={{boxShadow: '0 0 10px #00f0ff'}} />
-
+          {/* Clock Face SVG */}
+          <svg width="280" height="280" viewBox="0 0 280 280" className="drop-shadow-lg">
+            {/* Background Circle */}
+            <circle cx="140" cy="140" r="135" fill="#151b3a" stroke="#00f0ff" strokeWidth="4" style={{filter: 'drop-shadow(0 0 20px rgba(0, 240, 255, 0.5))'}} />
+            
             {/* Hour Numbers */}
-            {[...Array(12)].map((_, i) => {
-              const num = i === 0 ? 12 : i;
-              const angle = (i * 30) * (Math.PI / 180);
-              const x = 120 + 100 * Math.sin(angle);
-              const y = 120 - 100 * Math.cos(angle);
+            {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, i) => {
+              const angle = (i * 30 - 90) * (Math.PI / 180);
+              const x = 140 + 100 * Math.cos(angle);
+              const y = 140 + 100 * Math.sin(angle);
               return (
-                <div
-                  key={i}
-                  className="absolute w-full h-full flex items-center justify-center"
-                  style={{
-                    transform: `rotate(${i * 30}deg)`,
-                  }}
+                <text
+                  key={num}
+                  x={x}
+                  y={y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="font-display font-bold text-lg"
+                  fill="#00f0ff"
+                  style={{textShadow: '0 0 10px #00f0ff'}}
                 >
-                  <span
-                    className="absolute font-display font-bold text-neon-blue text-lg"
-                    style={{
-                      transform: `rotate(${-i * 30}deg) translateY(-90px)`,
-                      textShadow: '0 0 10px #00f0ff',
-                    }}
-                  >
-                    {num}
-                  </span>
-                </div>
+                  {num}
+                </text>
               );
             })}
-
-            {/* Hour Hand */}
-            <div
-              className="absolute top-1/2 left-1/2 w-2 h-16 bg-gradient-to-t from-neon-purple to-neon-pink rounded-full origin-bottom"
-              style={{
-                transform: `translate(-50%, -50%) rotate(${hourAngle}deg) translateY(-32px)`,
-                boxShadow: '0 0 10px rgba(255, 0, 126, 0.8)',
-                transition: 'transform 0.5s ease-in-out',
-              }}
-            />
-
-            {/* Minute Hand */}
-            <div
-              className="absolute top-1/2 left-1/2 w-1.5 h-24 bg-gradient-to-t from-neon-green to-neon-blue rounded-full origin-bottom"
-              style={{
-                transform: `translate(-50%, -50%) rotate(${minuteAngle}deg) translateY(-48px)`,
-                boxShadow: '0 0 10px rgba(0, 240, 255, 0.8)',
-                transition: 'transform 0.5s ease-in-out',
-              }}
-            />
-
-            {/* Second Hand */}
-            <div
-              className="absolute top-1/2 left-1/2 w-1 h-28 bg-neon-yellow origin-bottom"
-              style={{
-                transform: `translate(-50%, -50%) rotate(${secondAngle}deg) translateY(-56px)`,
-                boxShadow: '0 0 8px rgba(255, 255, 0, 0.8)',
-              }}
-            />
 
             {/* Tick Marks */}
             {[...Array(60)].map((_, i) => {
               const isMajor = i % 5 === 0;
               const angle = (i * 6) * (Math.PI / 180);
-              const length = isMajor ? 12 : 6;
-              const y1 = 120 - 108;
-              const y2 = 120 - (108 - length);
-              const x1 = 120;
-              const x2 = 120;
+              const x1 = 140 + 120 * Math.cos(angle);
+              const y1 = 140 + 120 * Math.sin(angle);
+              const x2 = 140 + (isMajor ? 110 : 115) * Math.cos(angle);
+              const y2 = 140 + (isMajor ? 110 : 115) * Math.sin(angle);
               return (
-                <div
-                  key={i}
-                  className="absolute"
-                  style={{
-                    left: '50%',
-                    top: '50%',
-                    width: '2px',
-                    height: length,
-                    backgroundColor: isMajor ? '#00f0ff' : '#2a3f6f',
-                    transformOrigin: '0 108px',
-                    transform: `translateX(-50%) rotate(${i * 6}deg)`,
-                  }}
+                <line
+                  key={`tick-${i}`}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={isMajor ? '#00f0ff' : '#2a3f6f'}
+                  strokeWidth={isMajor ? 2 : 1}
                 />
               );
             })}
-          </div>
+
+            {/* Hour Hand */}
+            <line
+              x1="140"
+              y1="140"
+              x2={140 + 45 * Math.cos((hourAngle - 90) * (Math.PI / 180))}
+              y2={140 + 45 * Math.sin((hourAngle - 90) * (Math.PI / 180))}
+              stroke="#ff006e"
+              strokeWidth="6"
+              strokeLinecap="round"
+              style={{transition: 'all 0.5s ease-in-out'}}
+              filter="url(#glowPink)"
+            />
+
+            {/* Minute Hand */}
+            <line
+              x1="140"
+              y1="140"
+              x2={140 + 70 * Math.cos((minuteAngle - 90) * (Math.PI / 180))}
+              y2={140 + 70 * Math.sin((minuteAngle - 90) * (Math.PI / 180))}
+              stroke="#00f0ff"
+              strokeWidth="4"
+              strokeLinecap="round"
+              style={{transition: 'all 0.5s ease-in-out'}}
+              filter="url(#glowBlue)"
+            />
+
+            {/* Second Hand */}
+            <line
+              x1="140"
+              y1="140"
+              x2={140 + 80 * Math.cos((secondAngle - 90) * (Math.PI / 180))}
+              y2={140 + 80 * Math.sin((secondAngle - 90) * (Math.PI / 180))}
+              stroke="#ffff00"
+              strokeWidth="2"
+              strokeLinecap="round"
+              filter="url(#glowYellow)"
+            />
+
+            {/* Center Dot */}
+            <circle cx="140" cy="140" r="6" fill="#00f0ff" filter="url(#glowBlue)" />
+
+            {/* Glow Filters */}
+            <defs>
+              <filter id="glowBlue">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glowPink">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glowYellow">
+                <feGaussianBlur stdDeviation="1" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
 
           {/* Date and Time Display */}
           <div className="text-center">
