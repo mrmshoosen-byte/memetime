@@ -88,8 +88,47 @@ export default function InteractiveClock({ onDateChange }) {
 
         {/* Analog Clock Display */}
         <div className="flex flex-col items-center gap-6 mb-6">
-          {/* Clock Face SVG */}
-          <svg width="280" height="280" viewBox="0 0 280 280" className="drop-shadow-lg">
+          {/* Clock Face SVG - Interactive */}
+          <svg 
+            width="280" 
+            height="280" 
+            viewBox="0 0 280 280" 
+            className="drop-shadow-lg cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={(e) => {
+              const svg = e.currentTarget;
+              const rect = svg.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              
+              // Convert to SVG coordinates
+              const svgX = (x / rect.width) * 280;
+              const svgY = (y / rect.height) * 280;
+              
+              // Calculate angle from center (140, 140)
+              const centerX = 140;
+              const centerY = 140;
+              let angle = Math.atan2(svgY - centerY, svgX - centerX) * (180 / Math.PI);
+              angle = angle + 90; // Adjust so 0° is at top
+              if (angle < 0) angle += 360;
+              
+              // Determine if clicking closer to minute or hour hand
+              const distance = Math.sqrt(Math.pow(svgX - centerX, 2) + Math.pow(svgY - centerY, 2));
+              
+              const newDate = new Date(selectedDate);
+              
+              if (distance > 50) {
+                // Outer area = set minutes
+                const minutes = Math.round((angle / 360) * 60) % 60;
+                newDate.setMinutes(minutes);
+              } else if (distance > 20) {
+                // Inner area = set hours
+                const hours = Math.round((angle / 360) * 12) % 12;
+                newDate.setHours(hours);
+              }
+              
+              setSelectedDate(newDate);
+            }}
+          >
             {/* Background Circle */}
             <circle cx="140" cy="140" r="135" fill="#151b3a" stroke="#00f0ff" strokeWidth="4" style={{filter: 'drop-shadow(0 0 20px rgba(0, 240, 255, 0.5))'}} />
             
