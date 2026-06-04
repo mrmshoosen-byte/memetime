@@ -1,0 +1,12 @@
+{
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm ci",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "redirects": [],
+  "rewrites": [],
+  "env": {
+    "NEXT_PUBLIC_NEWS_API_KEY": "@news_api_key"
+  }
+}
